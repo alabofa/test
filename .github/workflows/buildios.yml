@@ -1,0 +1,35 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Install MAUI Workload
+      run: dotnet workload install maui
+      
+    - name: Restore dependencies
+      run: dotnet restore HomePlus.csproj
+      
+    - name: Build iOS App
+      run: dotnet build HomePlus.csproj -f net8.0-ios -c Release
+      
+    - name: Archive iOS app
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-app
+        path: bin/Release/net8.0-ios/**/*.app
